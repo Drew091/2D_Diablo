@@ -93,7 +93,7 @@ func player():
 	pass
 
 func _on_player_hitbox_body_entered(body: Node2D) -> void:
-	if body.has_method("enemy"):
+	if body.has_method("enemy") and global.enemy_alive:
 		enemy_inattack_range = true
 		
 func _on_player_hitbox_body_exited(body: Node2D) -> void:

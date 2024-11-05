@@ -1,6 +1,7 @@
 extends Node
 
 var player_alive = true
+var enemy_alive = true
 var player_current_attack = false
 
 var current_scene = "world" #world cliff_side
