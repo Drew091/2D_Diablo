@@ -14,6 +14,7 @@ var attack_ip = false
 var speed = 100
 var current_dir = "right"
 
+
 func _ready():
 	$AnimatedSprite2D.play("front_idle")
 	charge_spell = ChargeSpell.new(self)

@@ -760,7 +760,8 @@ script = ExtResource("1_feciq")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ai2ue")
-animation = &"death"
+animation = &"front_idle_main"
+frame_progress = 0.480736
 offset = Vector2(0, -15)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

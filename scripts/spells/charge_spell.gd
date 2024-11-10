@@ -9,6 +9,7 @@ var charge_duration_timer : Timer
 var charge_cooldown_timer : Timer
 var charge_just_invoked = false
 var animation = -1
+var charge_speed_multiplier = 3
 
 func _init(entity) -> void:
 	self.entity = entity
@@ -24,12 +25,13 @@ func initialize_timers() -> void:
 	charge_cooldown_timer.connect("timeout",_on_charge_cooldown_timer_timeout)
 	charge_duration_timer.one_shot = true
 	charge_cooldown_timer.one_shot = true
-	charge_duration_timer.wait_time	= 0.15
-	charge_cooldown_timer.wait_time = 2
+	charge_duration_timer.wait_time	= 0.3
+	charge_cooldown_timer.wait_time = 4
 	
 	
 func invoke() -> void:
-	charge_just_invoked = true
+	if charge_cooldown:
+		charge_just_invoked = true
 	
 	
 func set_anim(animation) -> void:
@@ -47,11 +49,22 @@ func update() -> void:
 		print("chargeCD: ",charge_cooldown)
 			
 	if charging:
-		entity.velocity.x =  4 * entity.speed
-		entity.velocity.y = 0
+		if entity.current_dir == "right":
+			entity.velocity.x =  charge_speed_multiplier * entity.speed
+			entity.velocity.y = 0
+		if entity.current_dir == "left":
+			entity.velocity.x =  -charge_speed_multiplier * entity.speed
+			entity.velocity.y = 0
+		if entity.current_dir == "up":
+			entity.velocity.x =  0
+			entity.velocity.y = -charge_speed_multiplier * entity.speed
+		if entity.current_dir == "down":
+			entity.velocity.x =  0
+			entity.velocity.y = charge_speed_multiplier * entity.speed
+		
 		if animation != -1:
 			entity.play_anim(animation)
-	
+		
 	
 func _on_charge_duration_timeout() -> void:
 	charging = false
