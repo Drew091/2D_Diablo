@@ -2,27 +2,35 @@ extends CharacterBody2D
 
 var enemy_inattack_range = false
 var enemy_attack_cooldown = true
+var charge_cooldown = true
+var charging = false
 var health = 100
-var player_alive = true
+
+var charge_spell : ChargeSpell
+var charge_just_invoked = false
 
 var attack_ip = false
 
-const speed = 100
-var current_dir = "none"
+var speed = 100
+var current_dir = "right"
 
 func _ready():
 	$AnimatedSprite2D.play("front_idle")
+	charge_spell = ChargeSpell.new(self)
+	charge_spell.set_anim(1)
 
 func _physics_process(delta):
 	player_movement()
+	finalize_movement()
 	enemy_attack()
 	attack()
 	current_camera()
 	update_health()
 	player_death()
 	respawn()
-
-		
+	charge_spell.update()
+	
+	
 func player_movement():
 	if global.player_alive:
 		if Input.is_action_pressed("ui_right"):
@@ -45,12 +53,18 @@ func player_movement():
 			play_anim(1)
 			velocity.y = -speed
 			velocity.x = 0
+		elif Input.is_action_just_pressed("spell_1"):
+			print("player alive: ", global.player_alive)
+			charge_spell.invoke()
 		else:
 			play_anim(0)
-			velocity.x = 0
-			velocity.y = 0
-			
-		move_and_slide()
+
+
+func finalize_movement():
+	move_and_slide()
+	velocity.x = 0
+	velocity.y = 0
+	
 	
 func play_anim(movement):
 	if global.player_alive:
@@ -78,8 +92,7 @@ func play_anim(movement):
 				anim.play("front_walk")
 			elif movement == 0:
 				if attack_ip == false:
-					anim.play("front_idle")
-					
+					anim.play("front_idle")				
 		if dir == "up":
 			anim.flip_h = true
 			if movement == 1:
@@ -87,7 +100,6 @@ func play_anim(movement):
 			elif movement == 0:
 				if attack_ip == false:
 					anim.play("back_idle")
-			
 			
 func player():
 	pass
@@ -108,13 +120,13 @@ func enemy_attack():
 			$attack_cooldown.start()
 			print(health)
 			
-
 func _on_attack_cooldown_timeout() -> void:
 	enemy_attack_cooldown = true
 	
+	
 func attack():
 	var dir = current_dir
-	if Input.is_action_just_pressed("attack"):
+	if Input.is_action_just_pressed("attack") and global.player_alive:
 		global.player_current_attack = true
 		attack_ip = true
 		if dir == "right":
@@ -131,14 +143,12 @@ func attack():
 		if dir == "up":
 			$AnimatedSprite2D.play("back_attack")
 			$deal_attack_timer.start()
-			
-			
-
 
 func _on_deal_attack_timer_timeout() -> void:
 	$deal_attack_timer.stop()
 	global.player_current_attack = false
 	attack_ip = false
+	
 	
 func current_camera():
 	if global.current_scene == "world":
@@ -157,6 +167,7 @@ func update_health():
 		healthbar.visible = false
 	else:
 		healthbar.visible = true
+	
 	
 func _on_regen_timer_timeout() -> void:
 	if global.player_alive:
@@ -182,6 +193,8 @@ func player_death():
 			if dir == "left":
 				$AnimatedSprite2D.flip_h = true
 				$AnimatedSprite2D.play("death")
+				
+				
 func respawn():
 	if global.player_alive == false:
 		if Input.is_action_just_pressed("respawn"):
@@ -190,15 +203,3 @@ func respawn():
 			health = 100
 			global.player_alive = true
 			#self.queue_free()
-
-
-"""
-func respawn():
-		if health <= 0:
-			player_alive = false #go back to menu or respond
-			print("player has been killed")
-			self.position.x = global.player_start_posx
-			self.position.y = global.player_start_posy
-			health = 100
-			#self.queue_free()				
-"""
